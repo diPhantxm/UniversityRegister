@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace UniversityRegister.API.Models
 {
@@ -12,6 +13,7 @@ namespace UniversityRegister.API.Models
         public string MiddleName { get; set; }
         public string Role { get; set; }
 
+        [JsonIgnore]
         public ICollection<TeachersDisciplines> Disciplines { get; set; }
         public ICollection<Grade> Grades { get; set; }
 

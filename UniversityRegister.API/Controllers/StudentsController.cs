@@ -12,7 +12,7 @@ using UniversityRegister.API.Models;
 namespace UniversityRegister.API.Controllers
 {
     [Authorize]
-    [Route("api/students")]
+    [Route("api/Students")]
     [ApiController]
     public class StudentsController : ControllerBase
     {
@@ -25,6 +25,7 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Students
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
             return await _context.Students.ToListAsync();
@@ -32,16 +33,84 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Students/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Student>> GetStudent(int id)
+        [AllowAnonymous]
+        public async Task<ActionResult<Student>> GetStudent(string id)
         {
-            var student = await _context.Students.FindAsync(id);
+            return await Task.Run<ActionResult<Student>>(() =>
+            {
+                try
+                {
+                    var student = _context.Students.Where(s => s.Id == id).Single();
 
-            if (student == null)
+                    if (student == null)
+                    {
+                        return NotFound();
+                    }
+
+                    return student;
+                }
+                catch (Exception)
+                {
+                    return NotFound();
+                }
+            });
+        }
+
+        // GET: api/Students/ByClass/5
+        [HttpGet]
+        [Route("ByClass/{id:int}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<Student>>> GetStudentsByClass(int class_Id)
+        {
+            try
+            {
+                return await _context.StudentsClasses
+                .Where(sc => sc.Class.Id == class_Id)
+                .Select(sc => sc.Student)
+                .ToListAsync();
+            }
+            catch (ArgumentNullException)
             {
                 return NotFound();
             }
+        }
 
-            return student;
+        // POST: api/Students/ByClasses
+        [HttpPost]
+        [Route("ByClasses")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<IEnumerable<Student>>>> GetStudentsByClasses(IEnumerable<int> classIds)
+        {
+            try
+            {
+                var students = new List<IEnumerable<Student>>();
+                foreach (var classId in classIds)
+                {
+                    students.Add((await GetStudentsByClass(classId)).Value);
+                }
+                return students;
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpGet]
+        [Route("ByGroup/{group_Id:int}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<Student>>> GetStudentsByGroup(int group_Id)
+        {
+            try
+            {
+                return await _context.Students
+                    .Where(s => s.Group.Id == group_Id)
+                    .ToListAsync();
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
         }
 
         // PUT: api/Students/5
@@ -79,14 +148,17 @@ namespace UniversityRegister.API.Controllers
         public async Task<ActionResult<Student>> PostStudent(Student student)
         {
             _context.Students.Add(student);
+            var group = student.Group;
+            _context.Entry(group).State = EntityState.Modified;
+
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetStudent", new { id = student.Id }, student);
+            return student;
         }
 
         // DELETE: api/Students/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Student>> DeleteStudent(int id)
+        public async Task<ActionResult<Student>> DeleteStudent(string id)
         {
             var student = await _context.Students.FindAsync(id);
             if (student == null)

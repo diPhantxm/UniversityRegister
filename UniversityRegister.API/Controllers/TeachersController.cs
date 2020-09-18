@@ -6,25 +6,27 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using UniversityRegister.API;
 using UniversityRegister.API.Models;
+using UniversityRegister.API.Models.Security;
 
 namespace UniversityRegister.API.Controllers
 {
-    [Authorize]
-    [Route("api/[controller]")]
+    [Route("api/Teachers")]
     [ApiController]
     public class TeachersController : ControllerBase
     {
         private readonly UniversityRegisterDbContext _context;
 
-        public TeachersController(UniversityRegisterDbContext context)
+        public TeachersController(UniversityRegisterDbContext context, IConfiguration _config)
         {
             _context = context;
         }
 
         // GET: api/Teachers
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Teacher>>> GetTeachers()
         {
             return await _context.Teachers.ToListAsync();
@@ -32,6 +34,7 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Teachers/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Teacher>> GetTeacher(int id)
         {
             var teacher = await _context.Teachers.FindAsync(id);
@@ -47,19 +50,62 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Teachers/ByDiscipline/5
         [HttpGet]
         [Route("ByDyscipline/{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Teacher>>> GetTeachersByDiscipline(int discipline_Id)
         {
             try
             {
-                return await _context.TeachersDisciplines
+                var result = await _context.TeachersDisciplines
                 .Where(td => td.Discipline.Id == discipline_Id)
                 .Select(td => td.Teacher)
                 .ToListAsync();
+                return result;
             }
             catch (ArgumentNullException)
             {
                 return NotFound();
             }
+        }
+
+        // POST: api/Teachers/Add
+        [HttpPost("Add")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Teacher>> PostTeacher(TeacherCred teacher)
+        {
+            var rnd = new Random();
+            var salt = SecurityManager.GenerateSalt(rnd.Next() % 12 + 8);
+            var iterations = rnd.Next() % 12 + 1;
+            var hash = SecurityManager.GetHash(teacher.Password, salt, iterations);
+
+            teacher.Salt = salt;
+            teacher.Iterations = iterations;
+            teacher.Password = hash;
+
+            _context.Add(teacher);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetTeacher", new { id = teacher.Id }, teacher);
+        }
+
+        // POST: api/Teacher/Get
+        [HttpPost("Get")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Teacher>> PostGetTeacher(Teacher teacher)
+        {
+            try
+            {
+                var teacherFind = await _context.Teachers.SingleAsync(t => 
+                    t.FirstName == teacher.FirstName &&
+                    t.LastName == teacher.LastName &&
+                    t.MiddleName == teacher.MiddleName);
+
+                return teacher;
+            }
+            catch (Exception)
+            {
+                return NotFound();
+            }
+
         }
 
         // PUT: api/Teachers/5
@@ -72,7 +118,7 @@ namespace UniversityRegister.API.Controllers
             }
 
             _context.Entry(teacher).State = EntityState.Modified;
-
+            
             try
             {
                 await _context.SaveChangesAsync();
@@ -91,7 +137,6 @@ namespace UniversityRegister.API.Controllers
 
             return NoContent();
         }
-
 
         // DELETE: api/Teachers/5
         [HttpDelete("{id}")]

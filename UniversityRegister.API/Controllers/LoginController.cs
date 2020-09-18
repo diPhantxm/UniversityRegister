@@ -11,25 +11,29 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using UniversityRegister.API.Models;
+using UniversityRegister.API.Models.Security;
 
 namespace UniversityRegister.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Login")]
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private IConfiguration _config;
+        private readonly IConfiguration _config;
         private readonly UniversityRegisterDbContext _context;
 
-        public LoginController(UniversityRegisterDbContext context, IConfiguration config)
+        public LoginController(IConfiguration config, UniversityRegisterDbContext context)
         {
             _context = context;
             _config = config;
         }
 
         [HttpPost]
-        public IActionResult Login(string username, string password)
+        public IActionResult Login(Credentials creds)
         {
+            var username = creds.Username;
+            var password = creds.Password;
+
             IActionResult response = Unauthorized();
 
             var teacher = Authenticate(username, password);
@@ -47,39 +51,24 @@ namespace UniversityRegister.API.Controllers
         {
             Teacher teacher = null;
 
-            var teacherCred = _context.Teachers.Where(t => t.LastName + t.FirstName + t.MiddleName == username).Single();
-            var encodedPass = GetHash(password, teacherCred.Salt, teacherCred.Iterations);
-
-            if (encodedPass == teacherCred.Password)
+            try
             {
-                teacher = teacherCred;
-            }
+                var teacherCred = _context.Teachers.Where(t => String.Format($"{ t.LastName } { t.FirstName } { t.MiddleName }") == username).Single();
+                var encodedPass = SecurityManager.GetHash(password, teacherCred.Salt, teacherCred.Iterations);
 
-            return teacher;
+                if (encodedPass == teacherCred.Password)
+                {
+                    teacher = teacherCred;
+                }
+
+                return teacher;
+            }
+            catch (Exception)
+            {
+                return teacher;
+            }
         }
 
-        private byte[] GenerateSalt(int length)
-        {
-            var bytes = new byte[length];
-
-            using (var rng = new RNGCryptoServiceProvider())
-            {
-                rng.GetBytes(bytes);
-            }
-
-            return bytes;
-        }
-        private string GetHash(string password, byte[] salt, int iterations)
-        {
-            string hash = String.Empty;
-
-            using (var deriveBytes = new Rfc2898DeriveBytes(password, salt, iterations))
-            {
-                hash = Convert.ToBase64String(deriveBytes.GetBytes(salt.Length));
-            }
-
-            return hash;
-        }
         private string GenerateJWT(Teacher teacher)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
@@ -89,7 +78,8 @@ namespace UniversityRegister.API.Controllers
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
-                new Claim("Role", teacher.Role),
+                new Claim(ClaimTypes.Role, teacher.Role),
+                new Claim("Id", teacher.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
 
@@ -100,8 +90,7 @@ namespace UniversityRegister.API.Controllers
                 expires: DateTime.Now.AddHours(24),
                 signingCredentials: credentials);
 
-            var encodedToken = new JwtSecurityTokenHandler().WriteToken(token);
-            return encodedToken;
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -11,8 +12,8 @@ using UniversityRegister.API.Models;
 
 namespace UniversityRegister.API.Controllers
 {
-    [Authorize]
-    [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = "Bearer")]
+    [Route("api/Groups")]
     [ApiController]
     public class GroupsController : ControllerBase
     {
@@ -25,16 +26,18 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Groups
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Group>>> GetGroup()
         {
-            return await _context.Group.ToListAsync();
+            return await _context.Groups.ToListAsync();
         }
 
         // GET: api/Groups/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Group>> GetGroup(int id)
         {
-            var @group = await _context.Group.FindAsync(id);
+            var @group = await _context.Groups.FindAsync(id);
 
             if (@group == null)
             {
@@ -44,15 +47,35 @@ namespace UniversityRegister.API.Controllers
             return @group;
         }
 
+        // GET: api/Groups/evm-32
+        [HttpGet]
+        [Route("{name:alpha}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Group>> GetGroup(string name)
+        {
+            return await Task.Run<ActionResult<Group>>(() =>
+            {
+                try
+                {
+                    return _context.Groups.Where(g => g.Name == name).Single();
+                }
+                catch (Exception)
+                {
+                    return NotFound();
+                }
+            });
+        }
+
         // GET: api/Groups/ByDiscipline/math
         [HttpGet]
-        [Route("ByDiscipline/{name}")]
-        public async Task<ActionResult<IEnumerable<Group>>> GetGroupsByDiscipline(string discipline)
+        [Route("ByDiscipline/{disciplineName:alpha}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<Group>>> GetGroupsByDisciplineName(string disciplineName)
         {
             try
             {
                 return await _context.GroupsDisciplines
-                .Where(gd => gd.Discipline.Name == discipline)
+                .Where(gd => gd.Discipline.Name == disciplineName)
                 .Select(gd => gd.Group)
                 .ToListAsync();
             }
@@ -63,26 +86,29 @@ namespace UniversityRegister.API.Controllers
         }
 
         // GET: api/Groups/ByDiscipline/5
-        [HttpGet]
-        [Route("ByDiscipline/{id:int}")]
+        [HttpGet("ByDiscipline/{discipline_Id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Group>>> GetGroupsByDiscipline(int discipline_Id)
         {
             try
             {
-                return await _context.GroupsDisciplines
+                var result = await _context.GroupsDisciplines
                 .Where(gd => gd.Discipline.Id == discipline_Id)
                 .Select(gd => gd.Group)
                 .ToListAsync();
+                return result;
             }
             catch (ArgumentNullException)
             {
                 return NotFound();
             }
+
         }
 
         // GET: api/Groups/ByClass/5
         [HttpGet]
         [Route("ByClass/{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Group>>> GetGroupsByClass(int class_Id)
         {
             try
@@ -128,27 +154,62 @@ namespace UniversityRegister.API.Controllers
             return NoContent();
         }
 
-        // POST: api/Groups
+        // POST: api/Groups/Add
         [HttpPost]
+        [Route("Add")]
         public async Task<ActionResult<Group>> PostGroup(Group @group)
         {
-            _context.Group.Add(@group);
+            _context.Groups.Add(@group);
+            if (group.Disciplines != null && group.Disciplines.Count > 0)
+            {
+                foreach (var discipline in group.Disciplines)
+                {
+                    _context.Entry(discipline).State = EntityState.Added;
+                }
+            }
+            if (group.Classes != null && group.Classes.Count > 0)
+            {
+                foreach (var @class in group.Classes)
+                {
+                    _context.Entry(@class).State = EntityState.Added;
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetGroup", new { id = @group.Id }, @group);
+        }
+
+        // POST: api/Groups/Get
+        [HttpPost]
+        [Route("Get")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Group>> GetGroup(Group @group)
+        {
+            return await Task.Run<ActionResult<Group>>(() =>
+            {
+                try
+                {
+                    return Ok(_context.Groups.Where(g => g.Name == @group.Name).Single());
+                }
+                catch (Exception)
+                {
+                    return NotFound();
+                }
+            });
         }
 
         // DELETE: api/Groups/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Group>> DeleteGroup(int id)
         {
-            var @group = await _context.Group.FindAsync(id);
+            var @group = await _context.Groups.FindAsync(id);
             if (@group == null)
             {
                 return NotFound();
             }
 
-            _context.Group.Remove(@group);
+            _context.Groups.Remove(@group);
             await _context.SaveChangesAsync();
 
             return @group;
@@ -156,7 +217,7 @@ namespace UniversityRegister.API.Controllers
 
         private bool GroupExists(int id)
         {
-            return _context.Group.Any(e => e.Id == id);
+            return _context.Groups.Any(e => e.Id == id);
         }
     }
 }

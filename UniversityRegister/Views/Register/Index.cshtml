@@ -1,0 +1,17 @@
+﻿<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-3">
+            @Html.DropDownList("Disciplines", (IEnumerable<SelectListItem>)ViewBag.Disciplines, "Выберите Дисциплину", new { @onchange = @"ChangeDiscipline(this)", @class = "form-control" })
+        </div>
+        <div class="col-md-3">
+            @Html.DropDownList("Groups", (IEnumerable<SelectListItem>)ViewBag.Groups, "Выберите Группу", new { @onchange = @"ChangeGroup(this)", @class = "form-control" })
+        </div>
+    </div>
+</div>
+
+<div class="container mt-3">
+    <table class="table table-striped" id="studentsTable">
+
+    </table>
+    <button onclick="Save()" class="btn btn-success">Сохранить</button>
+</div>

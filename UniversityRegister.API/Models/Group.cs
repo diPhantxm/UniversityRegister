@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,7 +10,9 @@ namespace UniversityRegister.API.Models
     {
         public string Name { get; set; }
         public ICollection<Student> Students { get; set; }
+        [JsonIgnore]
         public ICollection<GroupsClasses> Classes { get; set; }
+        [JsonIgnore]
         public ICollection<GroupsDisciplines> Disciplines { get; set; }
 
         public Group()

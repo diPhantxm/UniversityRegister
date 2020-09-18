@@ -25,6 +25,7 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Disciplines
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Discipline>>> GetDisciplines()
         {
             return await _context.Disciplines.ToListAsync();
@@ -32,6 +33,7 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Disciplines/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Discipline>> GetDiscipline(int id)
         {
             var discipline = await _context.Disciplines.FindAsync(id);
@@ -44,9 +46,29 @@ namespace UniversityRegister.API.Controllers
             return discipline;
         }
 
+        [HttpGet("{name:alpha}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<Discipline>> GetDiscipline(string name)
+        {
+            return await Task.Run<ActionResult<Discipline>>(() =>
+            {
+                try
+                {
+                    return _context.Disciplines.Where(d => d.Name == name).Single();
+                }
+                catch (Exception)
+                {
+
+                    throw;
+                }
+            });
+            
+        }
+
         // GET: api/Disciplines/ByGroup/5
         [HttpGet]
-        [Route("ByGroup/{id:int}")]
+        [Route("ByGroup/{group_id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Discipline>>> GetDisciplinesByGroup(int group_Id)
         {
             try
@@ -64,16 +86,17 @@ namespace UniversityRegister.API.Controllers
         }
 
         // GET: api/Disciplines/ByTeacher/4
-        [HttpGet]
-        [Route("ByTeacher/{id:int}")]
+        [HttpGet("ByTeacher/{teacher_id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Discipline>>> GetDisciplinesByTeacher(int teacher_Id)
         {
             try
             {
-                return await _context.TeachersDisciplines
+                var result = await _context.TeachersDisciplines
                 .Where(td => td.Teacher.Id == teacher_Id)
                 .Select(td => td.Discipline)
                 .ToListAsync();
+                return result;
             }
             catch (ArgumentNullException)
             {
@@ -85,7 +108,8 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Discipline/ByTeacher/Ivanov/Ivan/Ivanovich
         [HttpGet]
         [Route("ByTeacher/{firstName}/{middleName}/{lastName}")]
-        public async Task<ActionResult<IEnumerable<Discipline>>> GetDisciplinesByTeacher(string firstName, string middleName, string lastName)
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<Discipline>>> GetDisciplinesByTeacherName(string firstName, string middleName, string lastName)
         {
             try
             {
@@ -134,6 +158,7 @@ namespace UniversityRegister.API.Controllers
 
         // POST: api/Disciplines
         [HttpPost]
+        [Route("Add")]
         public async Task<ActionResult<Discipline>> PostDiscipline(Discipline discipline)
         {
             _context.Disciplines.Add(discipline);
@@ -142,6 +167,24 @@ namespace UniversityRegister.API.Controllers
             return CreatedAtAction("GetDiscipline", new { id = discipline.Id }, discipline);
         }
 
+        // POST: api/Disciplines/math
+        [HttpPost]
+        [Route("Get")]
+        public async Task<ActionResult<Discipline>> GetDiscipline(Discipline disciplne)
+        {
+            return await Task.Run<ActionResult<Discipline>>(() =>
+            {
+                try
+                {
+                    return _context.Disciplines.Where(d => d.Name == disciplne.Name).Single();
+                }
+                catch (Exception)
+                {
+                    return NotFound();
+                }
+            });
+        }
+        
         // DELETE: api/Disciplines/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<Discipline>> DeleteDiscipline(int id)

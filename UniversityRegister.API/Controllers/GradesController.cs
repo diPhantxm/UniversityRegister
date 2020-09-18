@@ -25,6 +25,7 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Grades
         [HttpGet]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGrades()
         {
             return await _context.Grades.ToListAsync();
@@ -32,6 +33,7 @@ namespace UniversityRegister.API.Controllers
 
         // GET: api/Grades/5
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<Grade>> GetGrade(int id)
         {
             var grade = await _context.Grades.FindAsync(id);
@@ -47,6 +49,7 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Grades/ByStudent/5
         [HttpGet]
         [Route("ByStudent/{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGradesByStudent(string student_Id)
         {
             try
@@ -64,6 +67,7 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Grades/ByTeacher/5
         [HttpGet]
         [Route("ByTeacher/{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGradesByTeacher(int teacher_Id)
         {
             try
@@ -82,6 +86,7 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Grades/ByTeacher/Ivanov/Ivan/Ivanovich
         [HttpGet]
         [Route("ByTeacher/{firstName}/{middleName}/{lastName}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGradesByTeacher(string firstName, string middleName, string lastName)
         {
             try
@@ -101,6 +106,7 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Grades/ByDiscipline/5
         [HttpGet]
         [Route("ByDiscipline/{id:int}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGradesByDiscipline(int id)
         {
             try
@@ -118,6 +124,7 @@ namespace UniversityRegister.API.Controllers
         // GET: api/Grades/ByDiscipline/math
         [HttpGet]
         [Route("ByDiscipline/{name}")]
+        [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Grade>>> GetGradesByDiscipline(string discipline)
         {
             try

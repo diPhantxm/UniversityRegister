@@ -22,7 +22,7 @@ namespace UniversityRegister.API.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Group",
+                name: "Groups",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -31,26 +31,31 @@ namespace UniversityRegister.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Group", x => x.Id);
+                    table.PrimaryKey("PK_Groups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Teachers",
+                name: "Teacher",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    MiddleName = table.Column<string>(nullable: true)
+                    MiddleName = table.Column<string>(nullable: true),
+                    Role = table.Column<string>(nullable: true),
+                    Discriminator = table.Column<string>(nullable: false),
+                    Salt = table.Column<byte[]>(nullable: true),
+                    Iterations = table.Column<int>(nullable: true),
+                    Password = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Teachers", x => x.Id);
+                    table.PrimaryKey("PK_Teacher", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Class",
+                name: "Classes",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
@@ -60,9 +65,9 @@ namespace UniversityRegister.API.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Class", x => x.Id);
+                    table.PrimaryKey("PK_Classes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Class_Disciplines_DisciplineId",
+                        name: "FK_Classes_Disciplines_DisciplineId",
                         column: x => x.DisciplineId,
                         principalTable: "Disciplines",
                         principalColumn: "Id",
@@ -73,26 +78,25 @@ namespace UniversityRegister.API.Migrations
                 name: "GroupsDisciplines",
                 columns: table => new
                 {
+                    GroupId = table.Column<int>(nullable: false),
+                    DisciplineId = table.Column<int>(nullable: false),
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    GroupId = table.Column<int>(nullable: true),
-                    DisciplineId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GroupsDisciplines", x => x.Id);
+                    table.PrimaryKey("PK_GroupsDisciplines", x => new { x.DisciplineId, x.GroupId });
                     table.ForeignKey(
                         name: "FK_GroupsDisciplines_Disciplines_DisciplineId",
                         column: x => x.DisciplineId,
                         principalTable: "Disciplines",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupsDisciplines_Group_GroupId",
+                        name: "FK_GroupsDisciplines_Groups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Group",
+                        principalTable: "Groups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -109,9 +113,9 @@ namespace UniversityRegister.API.Migrations
                 {
                     table.PrimaryKey("PK_Students", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Students_Group_GroupId",
+                        name: "FK_Students_Groups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Group",
+                        principalTable: "Groups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -120,26 +124,25 @@ namespace UniversityRegister.API.Migrations
                 name: "TeachersDisciplines",
                 columns: table => new
                 {
+                    TeacherId = table.Column<int>(nullable: false),
+                    DisciplineId = table.Column<int>(nullable: false),
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    TeacherId = table.Column<int>(nullable: true),
-                    DisciplineId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TeachersDisciplines", x => x.Id);
+                    table.PrimaryKey("PK_TeachersDisciplines", x => new { x.DisciplineId, x.TeacherId });
                     table.ForeignKey(
                         name: "FK_TeachersDisciplines_Disciplines_DisciplineId",
                         column: x => x.DisciplineId,
                         principalTable: "Disciplines",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_TeachersDisciplines_Teachers_TeacherId",
+                        name: "FK_TeachersDisciplines_Teacher_TeacherId",
                         column: x => x.TeacherId,
-                        principalTable: "Teachers",
+                        principalTable: "Teacher",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -148,24 +151,24 @@ namespace UniversityRegister.API.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    GroupId = table.Column<int>(nullable: true),
-                    ClassId = table.Column<int>(nullable: true)
+                    GroupId = table.Column<int>(nullable: false),
+                    ClassId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GroupsClasses", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GroupsClasses_Class_ClassId",
+                        name: "FK_GroupsClasses_Classes_ClassId",
                         column: x => x.ClassId,
-                        principalTable: "Class",
+                        principalTable: "Classes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_GroupsClasses_Group_GroupId",
+                        name: "FK_GroupsClasses_Groups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "Group",
+                        principalTable: "Groups",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -196,16 +199,41 @@ namespace UniversityRegister.API.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Grades_Teachers_TeacherId",
+                        name: "FK_Grades_Teacher_TeacherId",
                         column: x => x.TeacherId,
-                        principalTable: "Teachers",
+                        principalTable: "Teacher",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "StudentsClasses",
+                columns: table => new
+                {
+                    StudentId = table.Column<string>(nullable: false),
+                    ClassId = table.Column<int>(nullable: false),
+                    Id = table.Column<int>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_StudentsClasses", x => new { x.StudentId, x.ClassId });
+                    table.ForeignKey(
+                        name: "FK_StudentsClasses_Classes_ClassId",
+                        column: x => x.ClassId,
+                        principalTable: "Classes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_StudentsClasses_Students_StudentId",
+                        column: x => x.StudentId,
+                        principalTable: "Students",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_Class_DisciplineId",
-                table: "Class",
+                name: "IX_Classes_DisciplineId",
+                table: "Classes",
                 column: "DisciplineId");
 
             migrationBuilder.CreateIndex(
@@ -234,11 +262,6 @@ namespace UniversityRegister.API.Migrations
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GroupsDisciplines_DisciplineId",
-                table: "GroupsDisciplines",
-                column: "DisciplineId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_GroupsDisciplines_GroupId",
                 table: "GroupsDisciplines",
                 column: "GroupId");
@@ -249,9 +272,9 @@ namespace UniversityRegister.API.Migrations
                 column: "GroupId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TeachersDisciplines_DisciplineId",
-                table: "TeachersDisciplines",
-                column: "DisciplineId");
+                name: "IX_StudentsClasses_ClassId",
+                table: "StudentsClasses",
+                column: "ClassId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_TeachersDisciplines_TeacherId",
@@ -271,22 +294,25 @@ namespace UniversityRegister.API.Migrations
                 name: "GroupsDisciplines");
 
             migrationBuilder.DropTable(
+                name: "StudentsClasses");
+
+            migrationBuilder.DropTable(
                 name: "TeachersDisciplines");
+
+            migrationBuilder.DropTable(
+                name: "Classes");
 
             migrationBuilder.DropTable(
                 name: "Students");
 
             migrationBuilder.DropTable(
-                name: "Class");
-
-            migrationBuilder.DropTable(
-                name: "Teachers");
-
-            migrationBuilder.DropTable(
-                name: "Group");
+                name: "Teacher");
 
             migrationBuilder.DropTable(
                 name: "Disciplines");
+
+            migrationBuilder.DropTable(
+                name: "Groups");
         }
     }
 }

@@ -1,0 +1,46 @@
+﻿@model  Credentials
+@section  Styles
+{
+    <link href="~/css/Login.css" rel="stylesheet" type="text/css" />
+}
+
+<section class="main">
+    <div class="layer">
+        <div class="content-w3ls">
+            <div class="content-bottom">
+                <form asp-action="Login" method="post">
+                    <div class="field-group">
+                        <span class="fa fa-user" aria-hidden="true"></span>
+                        <div class="wthree-field">
+                            <input asp-for="Username" id="text1" type="text" value="" placeholder="Username" required>
+                        </div>
+                        <span class="fa fa-user" aria-hidden="true"></span>
+                    </div>
+                    <div class="field-group">
+                        <span class="fa fa-lock" aria-hidden="true"></span>
+                        <div class="wthree-field">
+                            <input asp-for="Password" id="myInput" type="Password" placeholder="Password">
+                        </div>
+                        <span class="fa fa-lock" aria-hidden="true"></span>
+                    </div>
+                    <div class="wthree-field">
+                        <button type="submit" class="btn">Log in</button>
+                    </div>
+                    <ul class="list-login">
+                        <li class="switch-agileits">
+                            <label class="switch">
+                                <input type="checkbox">
+                                <span class="slider round"></span>
+                                keep Logged in
+                            </label>
+                        </li>
+                        <li>
+                            <a href="#" class="text-right">Forgot password?</a>
+                        </li>
+                        <li class="clearfix"></li>
+                    </ul>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>

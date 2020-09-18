@@ -1,0 +1,30 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div class="row">
+    <div class="col-sm">
+        <p>Add Teachers via Excel file</p>
+        <form asp-action="AddTeachers" asp-controller="Admin" method="post" enctype="multipart/form-data">
+            <input name="ExcelFiles" type="file" multiple />
+            <input type="submit" value="Add" />
+        </form>
+    </div>
+    <div class="col-sm">
+        <p>Add Students via Excel file</p>
+        <form asp-action="AddStudents" asp-controller="Register" method="post" enctype="multipart/form-data">
+            <input name="ExcelFiles" type="file" multiple />
+            <input type="submit" value="Add" />
+        </form>
+    </div>
+    <div class="col-sm">
+        <p>Add Groups via Excel file</p>
+        <form asp-action="AddGroups" asp-controller="Admin" method="post" enctype="multipart/form-data">
+            <input name="ExcelFiles" type="file" multiple />
+            <input type="submit" value="Add" />
+        </form>
+    </div>
+</div>
+
+

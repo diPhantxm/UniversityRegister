@@ -10,7 +10,7 @@ using UniversityRegister.API;
 namespace UniversityRegister.API.Migrations
 {
     [DbContext(typeof(UniversityRegisterDbContext))]
-    [Migration("20200909155011_InitialCreate")]
+    [Migration("20200918180857_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,7 +35,7 @@ namespace UniversityRegister.API.Migrations
 
                     b.HasIndex("DisciplineId");
 
-                    b.ToTable("Class");
+                    b.ToTable("Classes");
                 });
 
             modelBuilder.Entity("UniversityRegister.API.Models.Discipline", b =>
@@ -88,7 +88,7 @@ namespace UniversityRegister.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Group");
+                    b.ToTable("Groups");
                 });
 
             modelBuilder.Entity("UniversityRegister.API.Models.GroupsClasses", b =>
@@ -97,9 +97,9 @@ namespace UniversityRegister.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<int?>("ClassId");
+                    b.Property<int>("ClassId");
 
-                    b.Property<int?>("GroupId");
+                    b.Property<int>("GroupId");
 
                     b.HasKey("Id");
 
@@ -112,17 +112,13 @@ namespace UniversityRegister.API.Migrations
 
             modelBuilder.Entity("UniversityRegister.API.Models.GroupsDisciplines", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("DisciplineId");
 
-                    b.Property<int?>("DisciplineId");
+                    b.Property<int>("GroupId");
 
-                    b.Property<int?>("GroupId");
+                    b.Property<int>("Id");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("DisciplineId");
+                    b.HasKey("DisciplineId", "GroupId");
 
                     b.HasIndex("GroupId");
 
@@ -149,11 +145,29 @@ namespace UniversityRegister.API.Migrations
                     b.ToTable("Students");
                 });
 
+            modelBuilder.Entity("UniversityRegister.API.Models.StudentsClasses", b =>
+                {
+                    b.Property<string>("StudentId");
+
+                    b.Property<int>("ClassId");
+
+                    b.Property<int>("Id");
+
+                    b.HasKey("StudentId", "ClassId");
+
+                    b.HasIndex("ClassId");
+
+                    b.ToTable("StudentsClasses");
+                });
+
             modelBuilder.Entity("UniversityRegister.API.Models.Teacher", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired();
 
                     b.Property<string>("FirstName");
 
@@ -161,34 +175,47 @@ namespace UniversityRegister.API.Migrations
 
                     b.Property<string>("MiddleName");
 
+                    b.Property<string>("Role");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Teachers");
+                    b.ToTable("Teacher");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("Teacher");
                 });
 
             modelBuilder.Entity("UniversityRegister.API.Models.TeachersDisciplines", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("DisciplineId");
 
-                    b.Property<int?>("DisciplineId");
+                    b.Property<int>("TeacherId");
 
-                    b.Property<int?>("TeacherId");
+                    b.Property<int>("Id");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("DisciplineId");
+                    b.HasKey("DisciplineId", "TeacherId");
 
                     b.HasIndex("TeacherId");
 
                     b.ToTable("TeachersDisciplines");
                 });
 
+            modelBuilder.Entity("UniversityRegister.API.Models.TeacherCred", b =>
+                {
+                    b.HasBaseType("UniversityRegister.API.Models.Teacher");
+
+                    b.Property<int>("Iterations");
+
+                    b.Property<string>("Password");
+
+                    b.Property<byte[]>("Salt");
+
+                    b.HasDiscriminator().HasValue("TeacherCred");
+                });
+
             modelBuilder.Entity("UniversityRegister.API.Models.Class", b =>
                 {
                     b.HasOne("UniversityRegister.API.Models.Discipline", "Discipline")
-                        .WithMany("StudentsClasses")
+                        .WithMany("Classes")
                         .HasForeignKey("DisciplineId");
                 });
 
@@ -211,22 +238,26 @@ namespace UniversityRegister.API.Migrations
                 {
                     b.HasOne("UniversityRegister.API.Models.Class", "Class")
                         .WithMany("Groups")
-                        .HasForeignKey("ClassId");
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("UniversityRegister.API.Models.Group", "Group")
                         .WithMany("Classes")
-                        .HasForeignKey("GroupId");
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("UniversityRegister.API.Models.GroupsDisciplines", b =>
                 {
                     b.HasOne("UniversityRegister.API.Models.Discipline", "Discipline")
                         .WithMany("GroupsDisciplines")
-                        .HasForeignKey("DisciplineId");
+                        .HasForeignKey("DisciplineId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("UniversityRegister.API.Models.Group", "Group")
                         .WithMany("Disciplines")
-                        .HasForeignKey("GroupId");
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("UniversityRegister.API.Models.Student", b =>
@@ -236,15 +267,30 @@ namespace UniversityRegister.API.Migrations
                         .HasForeignKey("GroupId");
                 });
 
+            modelBuilder.Entity("UniversityRegister.API.Models.StudentsClasses", b =>
+                {
+                    b.HasOne("UniversityRegister.API.Models.Class", "Class")
+                        .WithMany("StudentsClasses")
+                        .HasForeignKey("ClassId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("UniversityRegister.API.Models.Student", "Student")
+                        .WithMany("StudentsClasses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("UniversityRegister.API.Models.TeachersDisciplines", b =>
                 {
                     b.HasOne("UniversityRegister.API.Models.Discipline", "Discipline")
                         .WithMany("Teachers")
-                        .HasForeignKey("DisciplineId");
+                        .HasForeignKey("DisciplineId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("UniversityRegister.API.Models.Teacher", "Teacher")
+                    b.HasOne("UniversityRegister.API.Models.TeacherCred", "Teacher")
                         .WithMany("Disciplines")
-                        .HasForeignKey("TeacherId");
+                        .HasForeignKey("TeacherId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }
