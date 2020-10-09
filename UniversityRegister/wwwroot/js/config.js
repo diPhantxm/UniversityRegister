@@ -1,1 +1,1 @@
-api = 'https://universityregisterapi20200921084201.azurewebsites.net/api/';
+api = '';
