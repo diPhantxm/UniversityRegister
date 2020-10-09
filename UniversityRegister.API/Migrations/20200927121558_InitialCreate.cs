@@ -106,7 +106,7 @@ namespace UniversityRegister.API.Migrations
                     Id = table.Column<string>(nullable: false),
                     FirstName = table.Column<string>(nullable: true),
                     LastName = table.Column<string>(nullable: true),
-                    MiddleName = table.Column<string>(nullable: true),
+                    Mail = table.Column<string>(nullable: true),
                     GroupId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>

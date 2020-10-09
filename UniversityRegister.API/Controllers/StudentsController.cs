@@ -28,7 +28,7 @@ namespace UniversityRegister.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
         {
-            return await _context.Students.ToListAsync();
+            return await _context.Students.OrderBy(s => s.LastName).ToListAsync();
         }
 
         // GET: api/Students/5
@@ -67,6 +67,7 @@ namespace UniversityRegister.API.Controllers
                 return await _context.StudentsClasses
                 .Where(sc => sc.Class.Id == class_Id)
                 .Select(sc => sc.Student)
+                .OrderBy(s => s.LastName)
                 .ToListAsync();
             }
             catch (ArgumentNullException)
@@ -105,6 +106,7 @@ namespace UniversityRegister.API.Controllers
             {
                 return await _context.Students
                     .Where(s => s.Group.Id == group_Id)
+                    .OrderBy(s => s.LastName)
                     .ToListAsync();
             }
             catch (Exception)

@@ -10,7 +10,7 @@ using UniversityRegister.API;
 namespace UniversityRegister.API.Migrations
 {
     [DbContext(typeof(UniversityRegisterDbContext))]
-    [Migration("20200918180857_InitialCreate")]
+    [Migration("20200927121558_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -136,7 +136,7 @@ namespace UniversityRegister.API.Migrations
 
                     b.Property<string>("LastName");
 
-                    b.Property<string>("MiddleName");
+                    b.Property<string>("Mail");
 
                     b.HasKey("Id");
 

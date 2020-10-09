@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>4586d7bc-319c-4e37-93a8-c39779207d56</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +29,8 @@
     <Compile Remove="Migrations\20200918162555_InitialCreate.Designer.cs" />
     <Compile Remove="Migrations\20200918164750_InitialCreate.cs" />
     <Compile Remove="Migrations\20200918164750_InitialCreate.Designer.cs" />
+    <Compile Remove="Migrations\20200924200431_InitialCreate.cs" />
+    <Compile Remove="Migrations\20200924200431_InitialCreate.Designer.cs" />
   </ItemGroup>
 
   <ItemGroup>

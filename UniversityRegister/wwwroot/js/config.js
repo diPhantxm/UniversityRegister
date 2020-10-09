@@ -1,1 +1,1 @@
-api = 'https://localhost:44335/api/';
+api = 'https://universityregisterapi20200921084201.azurewebsites.net/api/';

@@ -18,6 +18,13 @@
     <link rel="stylesheet" href="~/css/site.css" />
 </head>
 <body>
+    @if (ViewContext.RouteData.Values["controller"].ToString() != "Login")
+    {
+        <div class="container col-md-12 text-center">
+            <button class="btn btn-lg" onclick="logout()">Выйти</button>
+        </div>
+    }
+
     <div class="container">
         <partial name="_CookieConsentPartial" />
         <main role="main" class="pb-3">
@@ -45,7 +52,11 @@
     </environment>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/config.js" asp-append-version="true"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js" asp-append-version="true"></script>
 
+    <!-- jQuery Modal -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.js" ></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.2/jquery.modal.css" />
     @RenderSection("Scripts", required: false)
     @RenderSection("Styles", required: false)
 </body>

@@ -41,11 +41,10 @@ namespace UniversityRegister.Controllers
                 Token = HttpContext.Request.Cookies["Jwt"]
             };
             _uniAPI.SetJWT(token);
-            await HttpContext.SignOutAsync("Cookies");
 
             if (User.Identity.IsAuthenticated)
             {
-                return LocalRedirectPermanent("~/Register");
+                return LocalRedirectPermanent("~/Register/");
             }
 
             return View();
@@ -76,11 +75,11 @@ namespace UniversityRegister.Controllers
                 }
                 else
                 {
-                    return LocalRedirectPermanent("~/Login");
+                    return LocalRedirectPermanent("~/Login/");
                 }
             }
 
-            return LocalRedirectPermanent("~/Login");
+            return LocalRedirectPermanent("~/Login/");
         }
     }
 }

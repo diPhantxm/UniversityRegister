@@ -4,9 +4,7 @@ using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 using UniversityRegister.Models;
 
 namespace UniversityRegister.Services
@@ -24,14 +22,13 @@ namespace UniversityRegister.Services
 
                 foreach (var sheet in sheets)
                 {
-                    for (int i = 1; i < sheet.Dimension.Rows + 1; i++)
+                    for (int i = 2; i <= sheet.Dimension.Rows; i++)
                     {
-                        var Id = sheet.Cells[i, 1].Value.ToString();
-                        var fullName = sheet.Cells[i, 2].Value.ToString().Split(" ");
-                        var lastName = fullName[0];
-                        var firstName = fullName[1];
-                        var middleName = fullName[2];
-                        var groupName = sheet.Cells[i, 3].Value.ToString();
+                        var Id = sheet.Cells[i, 3].Value.ToString();
+                        var lastName = sheet.Cells[i, 2].Value.ToString();
+                        var firstName = sheet.Cells[i, 1].Value.ToString();
+                        var groupName = sheet.Cells[i, 5].Value.ToString();
+                        var mail = sheet.Cells[i, 6].Value.ToString();
 
                         var groupResponse = await _api.Post<Group, Group>("Groups/Get", new Group() { Name = groupName });
 
@@ -52,7 +49,7 @@ namespace UniversityRegister.Services
 
                         try
                         {
-                            var student = new Student(Id, firstName, lastName, middleName, group, new List<Grade>(), new List<StudentsClasses>());
+                            var student = new Student(Id, firstName, lastName, mail, group, new List<Grade>(), new List<StudentsClasses>());
                             await _api.Post<object, Student>("Students", student);
                         }
                         catch (Exception)

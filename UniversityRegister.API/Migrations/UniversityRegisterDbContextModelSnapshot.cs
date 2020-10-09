@@ -134,7 +134,7 @@ namespace UniversityRegister.API.Migrations
 
                     b.Property<string>("LastName");
 
-                    b.Property<string>("MiddleName");
+                    b.Property<string>("Mail");
 
                     b.HasKey("Id");
 

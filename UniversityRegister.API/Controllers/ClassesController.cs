@@ -191,6 +191,7 @@ namespace UniversityRegister.API.Controllers
                 var discipline = _context.Disciplines.Single(d => d.Id == @class.DisciplineId);
                 var group = _context.Groups.Single(g => g.Id == @class.GroupId);
                 var students = new List<Student>();
+
                 foreach (var student in @class.VisitedStudents)
                 {
                     students.Add(_context.Students.Single(s => s.Id == student));

@@ -15,6 +15,7 @@ namespace UniversityRegister.API.Controllers
 {
     [Route("api/Teachers")]
     [ApiController]
+    [Authorize]
     public class TeachersController : ControllerBase
     {
         private readonly UniversityRegisterDbContext _context;
@@ -29,7 +30,7 @@ namespace UniversityRegister.API.Controllers
         [AllowAnonymous]
         public async Task<ActionResult<IEnumerable<Teacher>>> GetTeachers()
         {
-            return await _context.Teachers.ToListAsync();
+            return await _context.Teachers.Select(t => (Teacher)t).ToListAsync();
         }
 
         // GET: api/Teachers/5
@@ -69,7 +70,6 @@ namespace UniversityRegister.API.Controllers
 
         // POST: api/Teachers/Add
         [HttpPost("Add")]
-        [AllowAnonymous]
         public async Task<ActionResult<Teacher>> PostTeacher(TeacherCred teacher)
         {
             var rnd = new Random();

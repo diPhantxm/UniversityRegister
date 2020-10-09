@@ -6,12 +6,12 @@ using Newtonsoft.Json;
 
 namespace UniversityRegister.API.Models
 {
-    public class Student : IPerson
+    public class Student
     {
         public string Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string MiddleName { get; set; }
+        public string Mail { get; set; }
 
         public virtual Group Group { get; set; }
         public virtual ICollection<Grade> Grades { get; set; }
@@ -24,21 +24,24 @@ namespace UniversityRegister.API.Models
             StudentsClasses = new List<StudentsClasses>();
         }
 
-        public Student(string Id, string firstName, string lastName, string middleName)
+        public Student(string id, string firstName, string lastName, string mail)
         {
+            Id = id;
             FirstName = firstName;
             LastName = lastName;
-            MiddleName = middleName;
+            Mail = mail;
 
             Grades = new List<Grade>();
             StudentsClasses = new List<StudentsClasses>();
         }
 
-        public Student(string Id, string firstName, string lastName, string middleName, Group group, ICollection<Grade> grades, ICollection<StudentsClasses> studentsClasses)
+        public Student(string id, string firstName, string lastName, string mail, Group group, ICollection<Grade> grades, ICollection<StudentsClasses> studentsClasses)
         {
+            Id = id;
             FirstName = firstName;
             LastName = lastName;
-            MiddleName = middleName;
+            Mail = mail;
+
             Group = group;
             Grades = grades;
             StudentsClasses = studentsClasses;
